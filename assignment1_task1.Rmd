@@ -7,5 +7,24 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(readxl)
+library(lubridate)
+```
+
+```{r}
+# read in the data
+amphibians <- read_excel(here("data", "sierra_amphibians.xlsx")) %>% 
+  filter(amphibian_species == "RAMU") %>% #filter to include only mountain yellow-legged frog
+  filter(amphibian_life_stage == c("SubAdult", "Tadpole", "Adult")) %>% 
+  mutate(year_new = year(survey_date))  %>%  #created new column with only year
+  count(year_new, amphibian_life_stage, sort = TRUE)
+  
+
+# count number of frogs each year across all water bodies
+# order by life stage
+# exclude 'eggmass'
+#  find the total number of adult, subadult, and tadpole yellow-legged frogs observed in the entire study region by life stage and year
 ```
 
