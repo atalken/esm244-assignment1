@@ -1,0 +1,11 @@
+---
+title: "esm244_assignment1_task1and2"
+author: "Anna Talken"
+date: "1/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
