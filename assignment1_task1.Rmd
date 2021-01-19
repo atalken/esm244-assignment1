@@ -16,7 +16,9 @@ library(lubridate)
 ### Read in the data
 ```{r, warning=FALSE, message=FALSE}
 #read in the data
-amphibians <- read_excel(here("data", "sierra_amphibians.xlsx")) %>% 
+amphibians <- read_excel(here("data", "sierra_amphibians.xlsx"))
+
+amphibian_ls <- amphibians %>% 
   filter(amphibian_species == "RAMU") %>% #filter to include only mountain yellow-legged frog
   filter(amphibian_life_stage == c("SubAdult", "Tadpole", "Adult")) %>% 
   mutate(year_new = year(survey_date))  %>%  #created new column with only year
@@ -27,7 +29,7 @@ amphibians <- read_excel(here("data", "sierra_amphibians.xlsx")) %>%
 ### Create a graph comparing mountain yellow-legged frog populations by life stage
 ```{r}
 #create ggplot
-ggplot(data = amphibians, aes(x = year_new, y = n, color = amphibian_life_stage)) +
+ggplot(data = amphibian_ls, aes(x = year_new, y = n, color = amphibian_life_stage)) +
   geom_point() +
   geom_line() +
   theme_minimal() +
@@ -35,4 +37,42 @@ ggplot(data = amphibians, aes(x = year_new, y = n, color = amphibian_life_stage)
        x = "Year",
        y= "Number")
 ```
+
+### Create a graph #2
+
+```{r}
+amphibian_adults <- amphibians %>% 
+  filter(amphibian_life_stage %in% c("SubAdult", "Adult")) %>% #filter to include only Adult and SubAdult frogs
+  filter(amphibian_location == "in lake") %>% #only include frogs in the lake
+  count(lake_id) %>% 
+  arrange(desc(n)) %>% #arrange in descending order
+  slice(1:5) #only keep top 5 values for n
+
+ggplot(amphibian_adults, aes(x = lake_id, y = n) +
+    geom_col()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
