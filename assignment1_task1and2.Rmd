@@ -11,6 +11,7 @@ library(tidyverse)
 library(here)
 library(readxl)
 library(lubridate)
+library(patchwork)
 ```
 
 ### Read in the data
@@ -26,10 +27,10 @@ amphibian_ls <- amphibians %>%
 
 ```
 
-### Create a graph comparing mountain yellow-legged frog populations by life stage
+### Graph #1: Comparing Mountain Yellow-Legged Frog populations by life stage
 ```{r}
 #create ggplot
-ggplot(data = amphibian_ls, aes(x = year_new, y = n, color = amphibian_life_stage)) +
+graph1 <- ggplot(data = amphibian_ls, aes(x = year_new, y = n, color = amphibian_life_stage)) +
   geom_point() +
   geom_line() +
   theme_minimal() +
@@ -38,9 +39,13 @@ ggplot(data = amphibian_ls, aes(x = year_new, y = n, color = amphibian_life_stag
        y= "Number")
 ```
 
-### Create a graph #2
+### Graph #2: Top 5 Lakes with Mountain Yellow-Legged Frogs
 
 ```{r}
+
+amphibians$lake_id <-as.character(as.numeric(amphibians$lake_id))
+
+
 amphibian_adults <- amphibians %>% 
   filter(amphibian_life_stage %in% c("SubAdult", "Adult")) %>% #filter to include only Adult and SubAdult frogs
   filter(amphibian_location == "in lake") %>% #only include frogs in the lake
@@ -48,8 +53,19 @@ amphibian_adults <- amphibians %>%
   arrange(desc(n)) %>% #arrange in descending order
   slice(1:5) #only keep top 5 values for n
 
-ggplot(amphibian_adults, aes(x = lake_id, y = n) +
-    geom_col()
+
+graph2 <- ggplot(data= amphibian_adults, aes(x=reorder(lake_id, -n), y=n)) +
+  geom_col(fill = "cyan4") +
+  labs(title = "Top 5 lakes with the greatest number of mountain yellow-legged frogs", 
+       x= "Lake ID",
+       y = "Number") +
+  theme_minimal() 
+
+```
+### Combine graphs using 'patchwork' package
+
+```{r}
+graph1 / graph2 #combining graph 1 and graph 2 on the same figure
 
 ```
 
