@@ -27,44 +27,48 @@ amphibian_ls <- amphibians %>%
 
 ```
 
-### Graph #1: Comparing Mountain Yellow-Legged Frog populations by life stage
-```{r}
+### Graph #1 Code: Comparing Mountain Yellow-Legged Frog populations by life stage
+```{r, warning=FALSE, message=FALSE}
 #create ggplot
 graph1 <- ggplot(data = amphibian_ls, aes(x = year_new, y = n, color = amphibian_life_stage)) +
   geom_point() +
   geom_line() +
   theme_minimal() +
-  labs(title = "Mountain yellow-legged frog population from 1995 to 2002",
+  labs(title = "Mountain Yellow-Legged Frog Population from 1995 to 2002",
        x = "Year",
-       y= "Number")
+       y= "Number",
+       color = "Life Stage")
 ```
 
-### Graph #2: Top 5 Lakes with Mountain Yellow-Legged Frogs
+### Graph #2 Code: Top 5 Lakes with Mountain Yellow-Legged Frogs
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 
 amphibians$lake_id <-as.character(as.numeric(amphibians$lake_id))
 
 
-amphibian_adults <- amphibians %>% 
+amphibian_top5 <- amphibians %>% 
   filter(amphibian_life_stage %in% c("SubAdult", "Adult")) %>% #filter to include only Adult and SubAdult frogs
   filter(amphibian_location == "in lake") %>% #only include frogs in the lake
-  count(lake_id) %>% 
-  arrange(desc(n)) %>% #arrange in descending order
-  slice(1:5) #only keep top 5 values for n
+  filter(amphibian_species == "RAMU") %>% 
+  group_by(lake_id) %>% 
+  summarize(ramu_frogs = sum(amphibian_number)) %>% #total frog counts per each lake
+  arrange(desc(ramu_frogs)) %>% #arrange in descending order
+  slice(1:5) #keep top 5 highest values of frogs per lake
+ 
 
 
-graph2 <- ggplot(data= amphibian_adults, aes(x=reorder(lake_id, -n), y=n)) +
+graph2 <- ggplot(data= amphibian_top5, aes(x=reorder(lake_id, -ramu_frogs), y=ramu_frogs)) +
   geom_col(fill = "cyan4") +
-  labs(title = "Top 5 lakes with the greatest number of mountain yellow-legged frogs", 
+  labs(title = "Top 5 lakes with the greatest number of Mountain Yellow-Legged Frogs", 
        x= "Lake ID",
        y = "Number") +
-  theme_minimal() 
+  theme_minimal()
 
 ```
 ### Combine graphs using 'patchwork' package
 
-```{r}
+```{r, warning=FALSE, message=FALSE, fig.cap= "Figure 1. Top: The change in Mountain Yellow-Legged Frog populations from 1995 to 2002 for different life stages - adults, subadults and tadpoles. Bottom: The top 5 lakes with the highest number of Mountain Yellow-Legged Frogs."}
 graph1 / graph2 #combining graph 1 and graph 2 on the same figure
 
 ```
