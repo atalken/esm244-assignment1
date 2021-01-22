@@ -1,5 +1,5 @@
 ---
-title: "esm244_assignment1_task1and2"
+title: "Task 1: Sierra Amphibians"
 author: "Anna Talken"
 date: "1/17/2021"
 output: html_document
