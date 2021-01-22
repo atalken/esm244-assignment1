@@ -1,5 +1,5 @@
 ---
-title: "Principal Components Analysis"
+title: "Task 2: Principal Components Analysis"
 author: "Anna Talken"
 date: "1/22/2021"
 output: html_document
@@ -7,5 +7,55 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggfortify) # For PCA biplot
 ```
 
+### Introduction 
+In this report I am exploring environmental and climatic data, from satellite imagery and geospatial datasets provided by Google Earth Engine. I am utilizing the method of Principal Components Analysis to determine the relationship between four different variables. In this multivariate analysis, I am looking specifically at cropland cover, tree canopy cover, average annual rain, and average annual temperature recorded across individual countries. This dataset, sourced from Google Earth Engine, was collected via remote sensing and calculated at a reduction scale of 10km. Data compiled and provided by Zander Venter.
+
+
+### PCA Biplot
+
+```{r, warning = FALSE, message = FALSE, fig.cap= "Figure 1. A principal components analysis biplot that illustrates variable relationships between global cropland cover, tree canopy cover, mean annual rain and mean annual temperatures. Each point on the biplot represents a different country. Axes (PC1 and PC2) represent the two principle components that explain the most amount of variation in the data."}
+#Read in the data
+world_climate <- read.csv(here("data", "world_env_vars.csv")) %>% 
+  clean_names()
+
+#Create PCA data frame
+climate_pca <- world_climate %>% 
+  dplyr::select(cropland_cover, tree_canopy_cover, rain_mean_annual, temp_mean_annual) %>% #select the variables to include in the PCA
+  tidyr::drop_na() %>% #get rid of N/A values
+  scale() %>% #make sure variable values are all on the same scale
+  prcomp()
+
+climate_complete <- world_climate %>% 
+  drop_na(cropland_cover, tree_canopy_cover, rain_mean_annual, temp_mean_annual)
+
+#Generate PCA biplot
+autoplot(climate_pca,
+         data = climate_complete,
+         loadings = TRUE,
+         colour = 'country',
+         loadings.label = TRUE,
+         loadings.colour = "black",
+         loadings.label.colour = "black",
+         loadings.label.vjust = -0.5
+         ) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Multivariate analysis of global environmental data across countries")
+
+```
+
+### Summary
+
+* Mean annual rainfall and tree canopy cover are the two variables with the greatest variance (highest eigenvalues) in PC1
+* Cropland cover and mean annual temperature have the highest eigenvalues in PC2
+* Mean annual rainfall and tree canopy cover are most closely positively correlated (small angle between lines)
+* Mean annual temperature and cropland cover are very highly negatively correlated
+* Tree canopy cover has almost no correlation with cropland cover or mean annual temperature
+* Mean annual rain also has almost no correlation with cropland cover or mean annual temperature
+* This PCA biplot explains 78.44% of the variance in the data (PC1 = 52.79%) and (PC2 = 25.65%)

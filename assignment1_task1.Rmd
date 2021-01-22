@@ -23,21 +23,24 @@ amphibian_ls <- amphibians %>%
   filter(amphibian_species == "RAMU") %>% #filter to include only mountain yellow-legged frog
   filter(amphibian_life_stage == c("SubAdult", "Tadpole", "Adult")) %>% 
   mutate(year_new = year(survey_date))  %>%  #created new column with only year
-  count(year_new, amphibian_life_stage, sort = TRUE) #count number of frogs by year and life stage
+  group_by(year_new, amphibian_life_stage) %>%  #count number of frogs by year and life stage
+  summarize(frog_count = sum(amphibian_number, na.rm = TRUE))
 
 ```
 
 ### Graph #1 Code: Comparing Mountain Yellow-Legged Frog populations by life stage
 ```{r, warning=FALSE, message=FALSE}
 #create ggplot
-graph1 <- ggplot(data = amphibian_ls, aes(x = year_new, y = n, color = amphibian_life_stage)) +
+graph1 <- ggplot(data = amphibian_ls, aes(x = year_new, y = frog_count, color = amphibian_life_stage)) +
   geom_point() +
   geom_line() +
   theme_minimal() +
   labs(title = "Mountain Yellow-Legged Frog Population from 1995 to 2002",
        x = "Year",
        y= "Number",
-       color = "Life Stage")
+       color = "Life Stage") +
+  facet_wrap(~amphibian_life_stage) +
+  theme(legend.position = "none")
 ```
 
 ### Graph #2 Code: Top 5 Lakes with Mountain Yellow-Legged Frogs
@@ -52,18 +55,18 @@ amphibian_top5 <- amphibians %>%
   filter(amphibian_location == "in lake") %>% #only include frogs in the lake
   filter(amphibian_species == "RAMU") %>% 
   group_by(lake_id) %>% 
-  summarize(ramu_frogs = sum(amphibian_number)) %>% #total frog counts per each lake
-  arrange(desc(ramu_frogs)) %>% #arrange in descending order
-  slice(1:5) #keep top 5 highest values of frogs per lake
- 
-
-
+  summarize(ramu_frogs = sum(amphibian_number)) %>%  #total frog counts per each lake
+  mutate(lake_id = fct_reorder(lake_id, ramu_frogs)) %>% #arrange in descending order
+  slice_max(ramu_frogs, n=5) #keep top 5 highest values of frogs per lake
+  
+# create ggplot
 graph2 <- ggplot(data= amphibian_top5, aes(x=reorder(lake_id, -ramu_frogs), y=ramu_frogs)) +
   geom_col(fill = "cyan4") +
   labs(title = "Top 5 lakes with the greatest number of Mountain Yellow-Legged Frogs", 
        x= "Lake ID",
        y = "Number") +
-  theme_minimal()
+  theme_minimal() +
+  coord_flip()
 
 ```
 ### Combine graphs using 'patchwork' package
